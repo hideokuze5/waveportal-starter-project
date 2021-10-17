@@ -139,7 +139,7 @@ const wave = async () => {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-  }, [allWaves])
+  }, [])
   
   return (
     <>
