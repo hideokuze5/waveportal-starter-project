@@ -10,7 +10,7 @@ const App = () => {
   const [message, setMessage] = useState('')
 
   //const contractAddress = "0xDb62934ad7284D1db6F79dA06FA6D459fA62ae09";
-  const contractAddress = "0x3C3BE10100d0062617e7A96934cc7cE4206c494a";
+  const contractAddress = "0x357fc29015423d8d9318fE33b56Eb64404F0a697";
 
   const contractABI = abi.abi;
   
