@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import './App.css';
 import abi from './utils/WavePortal.json'
+import MiningSpinner from './MiningSpinner/MiningSpinner';
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
   const [waveCount, setWaveCount] = useState('0')
   const [allWaves, setAllWaves] = useState([]);
   const [message, setMessage] = useState('')
+  const [showLoader, setShowLoader] = useState(false)
 
   //const contractAddress = "0xDb62934ad7284D1db6F79dA06FA6D459fA62ae09";
   // const contractAddress = "0x357fc29015423d8d9318fE33b56Eb64404F0a697";
@@ -81,9 +83,11 @@ const wave = async () => {
         // const waveTxn = await wavePortalContract.wave();
         const waveTxn = await wavePortalContract.wave(message, { gasLimit: 300000 })
         console.log("Mining...", waveTxn.hash);
+        setShowLoader(true)
 
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
+        setShowLoader(false)
 
         count = await wavePortalContract.getTotalWaves();
         setWaveCount(count.toNumber());
@@ -201,6 +205,7 @@ const wave = async () => {
                       <p className="mt-2 mx-auto max-w-2xl text-lg text-white">
                         Connect your Ethereum wallet and support us in our battle against Section 9!
                       </p>
+                      {showLoader && <MiningSpinner />}
                       <p className="mt-2 mx-auto max-w-2xl text-lg text-indigo-200">
                       {waveCount !== '0' && 
                         'Thank you! You are supporter #' + waveCount + '. Your support will help us in our cause.'
@@ -246,6 +251,8 @@ const wave = async () => {
               </div>
             </div>
           </div>
+
+          <div className="container mx-auto">
           <div className="flex flex-col">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -287,6 +294,9 @@ const wave = async () => {
               </div>
             </div>
           </div>
+          </div>
+
+
     </>
   );
 }
