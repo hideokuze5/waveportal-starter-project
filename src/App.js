@@ -11,9 +11,7 @@ const App = () => {
   const [message, setMessage] = useState('')
   const [showLoader, setShowLoader] = useState(false)
 
-  //const contractAddress = "0xDb62934ad7284D1db6F79dA06FA6D459fA62ae09";
-  // const contractAddress = "0x357fc29015423d8d9318fE33b56Eb64404F0a697";
-  const contractAddress = "0x83c0F21c1807d91C8D8135d877dEe220C92C8668";
+  const contractAddress = "0x120D4D73117068a6dB21B3f13D9a4Ab2fa098aCf";
 
   const contractABI = abi.abi;
   
@@ -58,7 +56,8 @@ const App = () => {
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       
       console.log("Connected", accounts[0]);
-      setCurrentAccount(accounts[0]); 
+      setCurrentAccount(accounts[0]);
+      getAllWaves();
     } catch (error) {
       console.log(error)
     }
@@ -100,6 +99,11 @@ const wave = async () => {
     }
   }
 
+
+ const sortWaves = (allWaves) => {
+    const updatedWaves = allWaves.sort((a, b) => b.timestamp - a.timestamp)
+    setAllWaves(updatedWaves)
+ }
  /*
    * Create a method that gets all waves from your contract
    */
@@ -123,7 +127,7 @@ const wave = async () => {
           });
         });
 
-        setAllWaves(wavesCleaned);
+        sortWaves(wavesCleaned);
 
         /**
          * Listen in for emitter events!
@@ -131,12 +135,16 @@ const wave = async () => {
         wavePortalContract.on("NewWave", (from, timestamp, message) => {
           console.log("NewWave", from, timestamp, message);
 
-          setAllWaves(prevState => [...prevState, {
+          setAllWaves(prevState => [{
             address: from,
             timestamp: new Date(timestamp * 1000),
             message: message
-          }]);
+          }, ...prevState]);
+
+          console.log('new waves:', allWaves)
         });
+
+
       } else {
         console.log("Ethereum object doesn't exist!")
       }
@@ -222,12 +230,9 @@ const wave = async () => {
                         )}
                       </p>
                     </div>
+                    {currentAccount && (
                     <div className="mt-12 sm:mx-auto sm:max-w-lg sm:flex">
-                    
                       <div className="min-w-0 flex-1">
-                        {/* <label htmlFor="cta-email" className="sr-only">
-                          Email address
-                        </label> */}
                         <input
                           id="message"
                           type="text"
@@ -246,57 +251,58 @@ const wave = async () => {
                         </button>
                       </div>
                     </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {currentAccount && (
           <div className="container mx-auto">
-          <div className="flex flex-col">
-            <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                          Address
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                          Time
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                          Message
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {allWaves.map((wave, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{wave.address}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{wave.timestamp.toString()}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{wave.message}</td>
+            <div className="flex flex-col">
+              <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                  <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
+                            Address
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
+                            Time
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
+                            Message
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {allWaves.map((wave, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{wave.address}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{wave.timestamp.toString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{wave.message}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          </div>
-
-
+          )}
     </>
   );
 }
