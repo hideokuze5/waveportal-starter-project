@@ -10,7 +10,8 @@ const App = () => {
   const [message, setMessage] = useState('')
 
   //const contractAddress = "0xDb62934ad7284D1db6F79dA06FA6D459fA62ae09";
-  const contractAddress = "0x357fc29015423d8d9318fE33b56Eb64404F0a697";
+  // const contractAddress = "0x357fc29015423d8d9318fE33b56Eb64404F0a697";
+  const contractAddress = "0x83c0F21c1807d91C8D8135d877dEe220C92C8668";
 
   const contractABI = abi.abi;
   
@@ -78,7 +79,7 @@ const wave = async () => {
         * Execute the actual wave from your smart contract
         */
         // const waveTxn = await wavePortalContract.wave();
-        const waveTxn = await wavePortalContract.wave(message)
+        const waveTxn = await wavePortalContract.wave(message, { gasLimit: 300000 })
         console.log("Mining...", waveTxn.hash);
 
         await waveTxn.wait();
@@ -98,23 +99,17 @@ const wave = async () => {
  /*
    * Create a method that gets all waves from your contract
    */
-  const getAllWaves = async () => {
+ const getAllWaves = async () => {
+    const { ethereum } = window;
+
     try {
-      const { ethereum } = window;
-      if (ethereum) {
+      if (window.ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
 
-        /*
-         * Call the getAllWaves method from your Smart Contract
-         */
         const waves = await wavePortalContract.getAllWaves();
-        
-        /*
-         * We only need address, timestamp, and message in our UI so let's
-         * pick those out
-         */
+
         let wavesCleaned = [];
         waves.forEach(wave => {
           wavesCleaned.push({
@@ -124,10 +119,20 @@ const wave = async () => {
           });
         });
 
-        /*
-         * Store our data in React State
-         */
         setAllWaves(wavesCleaned);
+
+        /**
+         * Listen in for emitter events!
+         */
+        wavePortalContract.on("NewWave", (from, timestamp, message) => {
+          console.log("NewWave", from, timestamp, message);
+
+          setAllWaves(prevState => [...prevState, {
+            address: from,
+            timestamp: new Date(timestamp * 1000),
+            message: message
+          }]);
+        });
       } else {
         console.log("Ethereum object doesn't exist!")
       }
